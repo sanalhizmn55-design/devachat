@@ -9,54 +9,56 @@
     <style>
         body { background: #000; color: white; font-family: -apple-system, sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
         
-        /* Üst Menü / Profil */
+        /* Üst Menü */
         .header { background: #121212; padding: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #363636; }
-        .profile-info { display: flex; align-items: center; gap: 10px; }
-        .logout-btn { background: #ed4956; border: none; color: white; padding: 6px 12px; border-radius: 5px; font-weight: bold; cursor: pointer; }
+        .profile-info { display: flex; align-items: center; gap: 10px; font-weight: bold; color: #0095f6; }
+        .logout-btn { background: #ed4956; border: none; color: white; padding: 8px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; }
 
         /* Mesaj Alanı */
-        #chatBox { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
-        .msg { background: #262626; padding: 10px; border-radius: 15px; max-width: 80%; width: fit-content; position: relative; cursor: pointer; }
-        .msg.me { align-self: flex-end; background: #005c4b; }
-        .msg b { font-size: 12px; color: #aaa; display: block; margin-bottom: 3px; }
-        .msg img { max-width: 100%; border-radius: 10px; margin-top: 5px; }
+        #chatBox { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 12px; scroll-behavior: smooth; }
+        .msg { background: #262626; padding: 12px; border-radius: 18px; max-width: 85%; width: fit-content; position: relative; border-bottom-left-radius: 2px; }
+        .msg.me { align-self: flex-end; background: #005c4b; border-bottom-left-radius: 18px; border-bottom-right-radius: 2px; }
+        .msg b { font-size: 13px; color: #0095f6; display: block; margin-bottom: 5px; }
+        .msg.me b { color: #53bdeb; }
+        .msg img { max-width: 100%; border-radius: 10px; margin-top: 5px; display: block; }
         
-        /* Yanıtlanan Mesaj Görünümü */
-        .replied-part { background: rgba(0,0,0,0.2); border-left: 3px solid #0095f6; padding: 5px; margin-bottom: 5px; font-size: 12px; border-radius: 4px; }
+        /* Yanıt ve Silme Bölümü */
+        .replied-part { background: rgba(0,0,0,0.3); border-left: 4px solid #0095f6; padding: 6px; margin-bottom: 8px; font-size: 12px; border-radius: 4px; color: #ccc; }
+        .delete-btn { background: none; border: none; color: #ff4d4d; font-size: 11px; cursor: pointer; padding: 0; margin-top: 8px; display: block; text-decoration: underline; }
 
-        /* Yanıt Paneli (Yazı kutusunun üstünde çıkar) */
-        #replyPreview { background: #1e1e1e; padding: 10px; display: none; justify-content: space-between; border-left: 5px solid #0095f6; }
+        /* Yanıt Paneli */
+        #replyPreview { background: #1e1e1e; padding: 12px; display: none; justify-content: space-between; border-left: 5px solid #0095f6; align-items: center; }
 
-        /* Alt Yazma Alanı */
-        .input-area { background: #121212; padding: 10px; border-top: 1px solid #363636; }
+        /* Giriş Alanı */
+        .input-area { background: #121212; padding: 12px; border-top: 1px solid #363636; }
         .input-row { display: flex; gap: 10px; align-items: center; }
-        #messageInput { flex: 1; padding: 12px; background: #000; border: 1px solid #363636; color: white; border-radius: 25px; outline: none; }
-        .file-btn { font-size: 24px; cursor: pointer; color: #0095f6; }
-        .send-btn { background: #0095f6; border: none; color: white; padding: 10px 20px; border-radius: 25px; font-weight: bold; }
+        #messageInput { flex: 1; padding: 14px; background: #000; border: 1px solid #363636; color: white; border-radius: 25px; outline: none; font-size: 15px; }
+        .file-label { font-size: 28px; cursor: pointer; color: #0095f6; padding: 0 5px; }
+        .send-btn { background: #0095f6; border: none; color: white; padding: 12px 22px; border-radius: 25px; font-weight: bold; font-size: 15px; }
     </style>
 </head>
 <body>
 
     <div class="header">
         <div class="profile-info">
-            <span id="userNameDisplay">Enes Bey</span>
+            <span>● <span id="userNameDisplay">Enes Bey</span></span>
         </div>
         <button class="logout-btn" onclick="cikisYap()">Çıkış Yap</button>
     </div>
 
     <div id="replyPreview">
-        <div>
-            <b id="replyUser" style="color:#0095f6"></b>
-            <p id="replyText" style="margin:2px 0; font-size:13px;"></p>
+        <div style="overflow: hidden;">
+            <b id="replyUser" style="color:#0095f6; font-size:12px;"></b>
+            <p id="replyText" style="margin:2px 0; font-size:13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"></p>
         </div>
-        <button onclick="yanitIptal()" style="background:none; border:none; color:white; font-size:20px;">×</button>
+        <button onclick="yanitIptal()" style="background:none; border:none; color:#aaa; font-size:24px; padding:0 10px;">×</button>
     </div>
 
     <div id="chatBox"></div>
 
     <div class="input-area">
         <div class="input-row">
-            <label class="file-btn">
+            <label class="file-label" title="Fotoğraf Seç">
                 + <input type="file" id="imageInput" accept="image/*" style="display:none" onchange="fotoGonder()">
             </label>
             <input type="text" id="messageInput" placeholder="Mesaj yazın...">
@@ -77,13 +79,14 @@
 
         document.getElementById('userNameDisplay').innerText = user;
 
+        // Mesaj Gönder
         function mesajGonder() {
             var msg = document.getElementById('messageInput').value;
-            if(msg != "" || replyData) {
+            if(msg.trim() != "" || replyData) {
                 db.ref('genel_sohbet').push({
                     gonderen: user,
                     mesaj: msg,
-                    yanit: replyData, // Yanıt bilgisi buraya gider
+                    yanit: replyData,
                     zaman: new Date().toLocaleTimeString()
                 });
                 document.getElementById('messageInput').value = "";
@@ -91,8 +94,10 @@
             }
         }
 
+        // Fotoğraf Gönder
         function fotoGonder() {
             var file = document.getElementById('imageInput').files[0];
+            if(!file) return;
             var reader = new FileReader();
             reader.onloadend = function() {
                 db.ref('genel_sohbet').push({
@@ -104,6 +109,14 @@
             reader.readAsDataURL(file);
         }
 
+        // Mesaj Sil
+        function mesajSil(key) {
+            if(confirm("Bu mesajı herkesten silmek istiyor musunuz?")) {
+                db.ref('genel_sohbet/' + key).remove();
+            }
+        }
+
+        // Yanıtla Başlat
         function yanitla(kim, ne) {
             replyData = { kim: kim, ne: ne };
             document.getElementById('replyPreview').style.display = 'flex';
@@ -122,21 +135,25 @@
             window.location.href = "index.html";
         }
 
+        // Mesajları Dinle
         db.ref('genel_sohbet').on('value', (snapshot) => {
             var chatBox = document.getElementById('chatBox');
             chatBox.innerHTML = "";
             snapshot.forEach((child) => {
                 var v = child.val();
+                var key = child.key;
                 var meClass = (v.gonderen == user) ? "me" : "";
                 
                 var yanitHtml = v.yanit ? `<div class="replied-part"><b>${v.yanit.kim}</b>: ${v.yanit.ne}</div>` : "";
-                var icerik = v.foto ? `<img src="${v.foto}">` : v.mesaj;
+                var icerik = v.foto ? `<img src="${v.foto}">` : `<span>${v.mesaj}</span>`;
+                var silBtn = (v.gonderen == user) ? `<button class="delete-btn" onclick="event.stopPropagation(); mesajSil('${key}')">Sil</button>` : "";
 
                 chatBox.innerHTML += `
                     <div class="msg ${meClass}" onclick="yanitla('${v.gonderen}', '${v.foto ? 'Fotoğraf' : v.mesaj}')">
                         <b>${v.gonderen}</b>
                         ${yanitHtml}
                         ${icerik}
+                        ${silBtn}
                     </div>`;
             });
             chatBox.scrollTop = chatBox.scrollHeight;
