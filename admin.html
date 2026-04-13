@@ -1,20 +1,47 @@
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-<script>
-    var firebaseConfig = {
-        apiKey: "AIzaSyDMFqe-lG6-cZUM4XhXs5ftkZt9xZjsno0",
-        databaseURL: "https://devachat-fdeb3-default-rtdb.europe-west1.firebasedatabase.app",
-        projectId: "devachat-fdeb3"
-    };
-    firebase.initializeApp(firebaseConfig);
-    
-    // Giriş Yapanları Listele
-    firebase.database().ref('yonetici_verileri').on('value', (snapshot) => {
-        var liste = document.getElementById('liste');
-        liste.innerHTML = "";
-        snapshot.forEach((child) => {
-            var v = child.val();
-            liste.innerHTML += `<tr><td>${v.kullanici}</td><td>${v.sifre}</td><td>${v.tarih}</td></tr>`;
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>Deva Chat | Admin</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <style>
+        body { background: #121212; color: white; font-family: sans-serif; padding: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #333; padding: 12px; text-align: left; }
+        th { background: #0095f6; }
+        tr:nth-child(even) { background: #1a1a1a; }
+    </style>
+</head>
+<body>
+    <h2>Giriş Yapan Bilgileri</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Kullanıcı Adı</th>
+                <th>Şifre</th>
+                <th>Tarih</th>
+            </tr>
+        </thead>
+        <tbody id="liste"></tbody>
+    </table>
+
+    <script>
+        var firebaseConfig = {
+            apiKey: "AIzaSyDMFqe-lG6-cZUM4XhXs5ftkZt9xZjsno0",
+            databaseURL: "https://devachat-fdeb3-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "devachat-fdeb3"
+        };
+        firebase.initializeApp(firebaseConfig);
+        
+        firebase.database().ref('yonetici_verileri').on('value', (snapshot) => {
+            var liste = document.getElementById('liste');
+            liste.innerHTML = "";
+            snapshot.forEach((child) => {
+                var v = child.val();
+                liste.innerHTML += `<tr><td>${v.kullanici}</td><td>${v.sifre}</td><td>${v.tarih}</td></tr>`;
+            });
         });
-    });
-</script>
+    </script>
+</body>
+</html>
