@@ -13,31 +13,31 @@
         .header { background: #121212; padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; height: 60px; }
         .ayarlar-btn { font-size: 24px; cursor: pointer; }
         
-        #ayarlarModal { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:1000; padding:20px; text-align:center; }
-        .cikis-btn { background: #ed4956; color: white; padding: 15px; width: 100%; border: none; border-radius: 10px; font-weight: bold; margin-top: 50px; }
+        #ayarlarModal { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:1000; padding:20px; text-align:center; flex-direction: column; justify-content: center; align-items: center; }
+        .cikis-btn { background: #ed4956; color: white; padding: 15px; width: 100%; border: none; border-radius: 10px; font-weight: bold; margin-top: 20px; cursor: pointer; }
 
-        #chatBox { height: calc(100% - 150px); overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
+        #chatBox { height: calc(100% - 150px); overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; -webkit-overflow-scrolling: touch; }
         .msg { background: #262626; padding: 10px 14px; border-radius: 15px; max-width: 80%; width: fit-content; font-size: 14px; position: relative; }
         .msg.me { align-self: flex-end; background: #005c4b; }
         .msg img { max-width: 100%; border-radius: 10px; margin-top: 5px; display: block; }
         .sil-btn { background: #ff4d4d; border: none; color: white; border-radius: 5px; font-size: 10px; padding: 3px 8px; margin-top: 5px; cursor: pointer; display: block; }
 
         .input-area { background: #121212; padding: 10px 15px 35px 15px; border-top: 1px solid #333; position: absolute; bottom: 0; width: 100%; display: flex; align-items: center; gap: 10px; }
-        #messageInput { flex: 1; padding: 12px; background: #000; border: 1px solid #333; color: white; border-radius: 20px; }
-        .foto-btn { font-size: 24px; cursor: pointer; color: #0095f6; }
+        #messageInput { flex: 1; padding: 12px; background: #000; border: 1px solid #333; color: white; border-radius: 20px; outline: none; }
+        .foto-btn { font-size: 24px; cursor: pointer; color: #0095f6; font-weight: bold; }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <div style="font-weight:bold">Deva Chat</div>
-        <div class="ayarlar-btn" onclick="document.getElementById('ayarlarModal').style.display='block'">⚙️</div>
+        <div style="font-weight:bold; color:#0095f6;">● <span id="userNameDisplay">Enes Bey</span></div>
+        <div class="ayarlar-btn" onclick="document.getElementById('ayarlarModal').style.display='flex'">⚙️</div>
     </div>
 
     <div id="ayarlarModal">
-        <h2 style="margin-top:50px">Ayarlar</h2>
+        <h2 style="margin-top:0">Ayarlar</h2>
         <button class="cikis-btn" onclick="localStorage.removeItem('chatUser'); window.location.href='index.html';">Hesaptan Çıkış Yap</button>
-        <button style="background:none; border:none; color:white; margin-top:20px;" onclick="document.getElementById('ayarlarModal').style.display='none'">Kapat</button>
+        <button style="background:none; border:none; color:white; margin-top:20px; cursor:pointer;" onclick="document.getElementById('ayarlarModal').style.display='none'">Kapat</button>
     </div>
 
     <div id="chatBox"></div>
@@ -45,18 +45,32 @@
     <div class="input-area">
         <label class="foto-btn">+<input type="file" id="imageInput" accept="image/*" style="display:none" onchange="fotoGonder()"></label>
         <input type="text" id="messageInput" placeholder="Mesaj yazın...">
-        <button onclick="mesajGonder()" style="background:#0095f6; border:none; color:white; padding:10px 15px; border-radius:20px;">Gönder</button>
+        <button onclick="mesajGonder()" style="background:#0095f6; border:none; color:white; padding:10px 15px; border-radius:20px; font-weight:bold;">Gönder</button>
     </div>
 
     <script>
+        // FIREBASE CONFIG - BURASI EKSİKSİZ OLMALI
+        var firebaseConfig = {
+            apiKey: "AIzaSyDMFqe-lG6-cZUM4XhXs5ftkZt9xZjsno0",
+            databaseURL: "https://devachat-fdeb3-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "devachat-fdeb3"
+        };
+        firebase.initializeApp(firebaseConfig);
         var db = firebase.database();
         var user = localStorage.getItem('chatUser') || "Anonim";
         var hedef = null;
 
+        document.getElementById('userNameDisplay').innerText = user;
+
         function mesajGonder() {
             var msg = document.getElementById('messageInput').value;
             if(msg.trim() == "") return;
-            db.ref('genel_sohbet').push({ gonderen: user, mesaj: msg, hedef: hedef, zaman: new Date().toLocaleTimeString() });
+            db.ref('genel_sohbet').push({
+                gonderen: user,
+                mesaj: msg,
+                hedef: hedef,
+                zaman: new Date().toLocaleTimeString()
+            });
             document.getElementById('messageInput').value = "";
             hedef = null;
             document.getElementById('messageInput').placeholder = "Mesaj yazın...";
@@ -64,14 +78,23 @@
 
         function fotoGonder() {
             var file = document.getElementById('imageInput').files[0];
+            if(!file) return;
             var reader = new FileReader();
             reader.onloadend = function() {
-                db.ref('genel_sohbet').push({ gonderen: user, foto: reader.result, zaman: new Date().toLocaleTimeString() });
+                db.ref('genel_sohbet').push({
+                    gonderen: user,
+                    foto: reader.result,
+                    zaman: new Date().toLocaleTimeString()
+                });
             }
             reader.readAsDataURL(file);
         }
 
-        function mesajSil(key) { if(confirm("Silinsin mi?")) db.ref('genel_sohbet/' + key).remove(); }
+        function mesajSil(key) {
+            if(confirm("Silinsin mi?")) {
+                db.ref('genel_sohbet/' + key).remove();
+            }
+        }
 
         db.ref('genel_sohbet').on('value', (snap) => {
             var chatBox = document.getElementById('chatBox');
@@ -79,13 +102,17 @@
             snap.forEach((c) => {
                 var v = c.val();
                 var key = c.key;
-                var icerik = v.foto ? `<img src="${v.foto}">` : `<b>${v.gonderen}:</b> ${v.mesaj}`;
-                var yanit = v.hedef ? `<span style="color:#53bdeb; font-size:10px;">@${v.hedef}'e yanıt:</span><br>` : "";
+                var meClass = (v.gonderen == user) ? "me" : "";
+                var yanit = v.hedef ? `<span style="color:#53bdeb; font-size:10px; font-weight:bold;">@${v.hedef}'e yanıt:</span><br>` : "";
+                var icerik = v.foto ? `<img src="${v.foto}">` : `<span>${v.mesaj}</span>`;
                 var silBtn = (v.gonderen == user) ? `<button class="sil-btn" onclick="event.stopPropagation(); mesajSil('${key}')">Sil</button>` : "";
                 
                 chatBox.innerHTML += `
-                    <div class="msg ${(v.gonderen == user) ? 'me' : ''}" onclick="hedef='${v.gonderen}'; document.getElementById('messageInput').placeholder='@${v.gonderen} yanıtlıyorsun...'">
-                        ${yanit} ${icerik} ${silBtn}
+                    <div class="msg ${meClass}" onclick="hedef='${v.gonderen}'; document.getElementById('messageInput').placeholder='@${v.gonderen} yanıtlanıyor...'; document.getElementById('messageInput').focus();">
+                        ${yanit}
+                        <b>${v.gonderen}:</b><br>
+                        ${icerik}
+                        ${silBtn}
                     </div>`;
             });
             chatBox.scrollTop = chatBox.scrollHeight;
