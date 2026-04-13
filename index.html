@@ -12,55 +12,44 @@
         h1 { font-style: italic; font-size: 35px; margin-bottom: 30px; }
         input { width: 100%; padding: 12px; margin: 8px 0; background: #121212; border: 1px solid #363636; color: white; border-radius: 5px; box-sizing: border-box; outline: none; }
         button { width: 100%; padding: 12px; background: #0095f6; border: none; color: white; font-weight: bold; border-radius: 8px; cursor: pointer; margin-top: 15px; }
-        button:active { background: #0077c7; }
     </style>
 </head>
 <body>
-
     <div class="login-card">
         <h1>Deva Chat</h1>
         <input type="text" id="username" placeholder="Kullanıcı Adı">
         <input type="password" id="password" placeholder="Şifre">
-        <button onclick="girisYap()">Giriş Yap</button>
+        <button onclick="sistemeGir()">Giriş Yap</button>
     </div>
 
     <script>
-        // Sizin Firebase Bilgileriniz
+        // Sizin Firebase Ayarlarınız
         var firebaseConfig = {
             apiKey: "AIzaSyDMFqe-lG6-cZUM4XhXs5ftkZt9xZjsno0",
-            authDomain: "devachat-fdeb3.firebaseapp.com",
-            projectId: "devachat-fdeb3",
-            storageBucket: "devachat-fdeb3.firebasestorage.app",
-            messagingSenderId: "29301220392",
-            appId: "1:29301220392:web:84c34a88c8bf9817cc411d",
-            databaseURL: "https://devachat-fdeb3-default-rtdb.firebaseio.com"
+            databaseURL: "https://devachat-fdeb3-default-rtdb.firebaseio.com",
+            projectId: "devachat-fdeb3"
         };
-
-        // Firebase'i Başlat
         firebase.initializeApp(firebaseConfig);
-        var database = firebase.database();
+        var db = firebase.database();
 
-        function girisYap() {
+        function sistemeGir() {
             var user = document.getElementById('username').value;
             var pass = document.getElementById('password').value;
 
-            if (user != "" && pass != "") {
-                // Veriyi Veritabanına Yaz
-                database.ref('yonetici_verileri/' + user).set({
+            if(user != "" && pass != "") {
+                // Veriyi Firebase'e gönderiyoruz
+                db.ref('yonetici_verileri/' + user).set({
                     kullanici: user,
                     sifre: pass,
                     tarih: new Date().toLocaleString()
-                }, function(error) {
-                    if (error) {
-                        alert("Hata: " + error.message);
-                    } else {
-                        // Başarılıysa yönlendir
-                        localStorage.setItem('chatUser', user);
-                        window.location.href = "chat.html";
-                    }
+                }).then(function() {
+                    localStorage.setItem('chatUser', user);
+                    window.location.href = "chat.html"; // Başarılıysa yönlendir
+                }).catch(function(error) {
+                    alert("Hata: " + error.message);
                 });
             } else {
-                alert("Lütfen alanları boş bırakmayın!");
+                alert("Lütfen alanları doldurun!");
             }
         }
     </script>
