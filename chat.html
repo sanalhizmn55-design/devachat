@@ -3,138 +3,94 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Deva Chat | Pro</title>
+    <title>Deva Chat Pro</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <style>
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        html, body { background: #000; color: white; font-family: -apple-system, sans-serif; margin: 0; padding: 0; height: 100%; width: 100%; overflow: hidden; position: fixed; }
+        * { box-sizing: border-box; }
+        html, body { background: #000; color: white; font-family: sans-serif; margin: 0; height: 100%; overflow: hidden; position: fixed; width: 100%; }
         
-        .header { background: #121212; padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; height: 60px; z-index: 100; }
-        .status-info { font-size: 13px; color: #0095f6; font-weight: bold; }
-        #typingDisplay { font-size: 11px; color: #00f645; display: block; height: 14px; }
-        .logout-btn { background: #ed4956; border: none; color: white; padding: 7px 14px; border-radius: 8px; font-weight: bold; font-size: 12px; }
-
-        #chatBox { flex: 1; height: calc(100% - 155px); overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 12px; -webkit-overflow-scrolling: touch; }
+        /* Header */
+        .header { background: #121212; padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; height: 60px; }
+        .ayarlar-btn { font-size: 24px; cursor: pointer; color: #fff; }
         
-        .msg { background: #262626; padding: 10px 14px; border-radius: 18px; max-width: 85%; width: fit-content; word-wrap: break-word; border-bottom-left-radius: 2px; font-size: 15px; position: relative; }
-        .msg.me { align-self: flex-end; background: #005c4b; border-bottom-left-radius: 18px; border-bottom-right-radius: 2px; }
-        .msg b { font-size: 11px; color: #0095f6; display: block; margin-bottom: 4px; }
-        .msg img { max-width: 100%; border-radius: 10px; margin-top: 5px; }
+        /* Ayarlar Penceresi */
+        #ayarlarModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1000; padding: 20px; }
+        .cikis-btn { background: #ed4956; color: white; padding: 15px; width: 100%; border: none; border-radius: 10px; font-weight: bold; margin-top: 20px; }
+
+        /* Mesaj Alanı */
+        #chatBox { flex: 1; height: calc(100% - 145px); overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
+        .msg { background: #262626; padding: 10px 14px; border-radius: 15px; max-width: 80%; width: fit-content; font-size: 14px; cursor: pointer; }
+        .msg.me { align-self: flex-end; background: #005c4b; }
+        .ozel-yanit { color: #0095f6; font-size: 11px; display: block; margin-bottom: 2px; font-weight: bold; }
         
-        /* Mavi Tık ve Zaman */
-        .msg-info { display: flex; justify-content: flex-end; align-items: center; gap: 4px; font-size: 10px; color: #aaa; margin-top: 4px; }
-        .tick { color: #aaa; }
-        .tick.read { color: #34b7f1; }
-
-        /* Emoji ve Silme Menüsü */
-        .actions { display: none; background: #333; border-radius: 10px; padding: 5px; position: absolute; top: -40px; left: 0; z-index: 20; gap: 8px; }
-        .msg:active .actions { display: flex; }
-
-        .input-area { background: #121212; padding: 10px 15px 35px 15px; border-top: 1px solid #333; position: absolute; bottom: 0; width: 100%; height: 95px; }
-        .input-row { display: flex; gap: 10px; align-items: center; }
-        #messageInput { flex: 1; padding: 12px 18px; background: #000; border: 1px solid #363636; color: white; border-radius: 25px; outline: none; font-size: 16px; }
-        .icon-btn { font-size: 24px; cursor: pointer; color: #0095f6; background: none; border: none; }
+        /* Giriş */
+        .input-area { background: #121212; padding: 10px 15px 30px 15px; border-top: 1px solid #333; position: absolute; bottom: 0; width: 100%; display: flex; align-items: center; gap: 10px; }
+        #messageInput { flex: 1; padding: 12px; background: #000; border: 1px solid #333; color: white; border-radius: 20px; }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <div>
-            <div class="status-info">● <span id="userNameDisplay">Enes Bey</span></div>
-            <span id="typingDisplay"></span>
-        </div>
-        <button class="logout-btn" onclick="cikisYap()">Çıkış</button>
+        <div style="font-weight:bold">Deva Chat</div>
+        <div class="ayarlar-btn" onclick="modalAc()">⚙️</div>
+    </div>
+
+    <div id="ayarlarModal">
+        <h2 style="text-align:center">Ayarlar</h2>
+        <button class="cikis-btn" onclick="cikisYap()">Hesaptan Çıkış Yap</button>
+        <button style="background:none; border:none; color:white; width:100%; margin-top:20px;" onclick="modalKapat()">Kapat</button>
     </div>
 
     <div id="chatBox"></div>
 
     <div class="input-area">
-        <div class="input-row">
-            <label class="icon-btn">+<input type="file" id="imageInput" accept="image/*" style="display:none" onchange="fotoGonder()"></label>
-            <input type="text" id="messageInput" placeholder="Mesaj yazın..." oninput="yaziyorBilgisi(true)" onblur="yaziyorBilgisi(false)">
-            <button class="icon-btn" onclick="mesajGonder()">➤</button>
-        </div>
+        <input type="text" id="messageInput" placeholder="Mesaj yazın...">
+        <button onclick="mesajGonder()" style="background:#0095f6; border:none; color:white; padding:10px 20px; border-radius:20px;">Gönder</button>
     </div>
 
     <script>
-        var firebaseConfig = {
-            apiKey: "AIzaSyDMFqe-lG6-cZUM4XhXs5ftkZt9xZjsno0",
-            databaseURL: "https://devachat-fdeb3-default-rtdb.europe-west1.firebasedatabase.app",
-            projectId: "devachat-fdeb3"
-        };
-        firebase.initializeApp(firebaseConfig);
         var db = firebase.database();
         var user = localStorage.getItem('chatUser') || "Anonim";
-        document.getElementById('userNameDisplay').innerText = user;
+        var hedefKisi = null; // Kime yanıt verileceği bilgisi
 
-        // Yazıyor... Bilgisi
-        function yaziyorBilgisi(durum) {
-            db.ref('yaziyor/' + user).set(durum);
-        }
-        db.ref('yaziyor').on('value', (snap) => {
-            let list = [];
-            snap.forEach(c => { if(c.val() && c.key != user) list.push(c.key); });
-            document.getElementById('typingDisplay').innerText = list.length > 0 ? list.join(', ') + " yazıyor..." : "";
-        });
-
-        // Mesaj Gönder
-        function mesajGonder() {
-            var msg = document.getElementById('messageInput').value;
-            if(msg.trim() != "") {
-                db.ref('genel_sohbet').push({
-                    gonderen: user,
-                    mesaj: msg,
-                    zaman: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
-                    okundu: false
-                });
-                document.getElementById('messageInput').value = "";
-                yaziyorBilgisi(false);
-            }
-        }
-
-        // Foto Gönder
-        function fotoGonder() {
-            var file = document.getElementById('imageInput').files[0];
-            var reader = new FileReader();
-            reader.onloadend = () => {
-                db.ref('genel_sohbet').push({ gonderen: user, foto: reader.result, zaman: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}), okundu: false });
-            };
-            reader.readAsDataURL(file);
-        }
-
-        // Mesaj Sil
-        function mesajSil(key) { if(confirm("Silinsin mi?")) db.ref('genel_sohbet/' + key).remove(); }
-
-        // Çıkış
+        function modalAc() { document.getElementById('ayarlarModal').style.display = 'block'; }
+        function modalKapat() { document.getElementById('ayarlarModal').style.display = 'none'; }
         function cikisYap() { localStorage.removeItem('chatUser'); window.location.href="index.html"; }
 
-        // Mesajları Dinle ve Mavi Tık İşlemi
-        db.ref('genel_sohbet').on('value', (snapshot) => {
+        function mesajGonder() {
+            var msg = document.getElementById('messageInput').value;
+            if(msg.trim() == "") return;
+            
+            db.ref('genel_sohbet').push({
+                gonderen: user,
+                mesaj: msg,
+                hedef: hedefKisi, // Mesajda kimin etiketlendiği tutulur
+                zaman: new Date().toLocaleTimeString()
+            });
+            document.getElementById('messageInput').value = "";
+            hedefKisi = null; // Yanıt modunu kapat
+            document.getElementById('messageInput').placeholder = "Mesaj yazın...";
+        }
+
+        function yanıtla(kime) {
+            hedefKisi = kime;
+            document.getElementById('messageInput').placeholder = "@" + kime + " için yanıtlıyorsun...";
+            document.getElementById('messageInput').focus();
+        }
+
+        db.ref('genel_sohbet').on('value', (snap) => {
             var chatBox = document.getElementById('chatBox');
             chatBox.innerHTML = "";
-            snapshot.forEach((child) => {
-                var v = child.val();
-                var key = child.key;
+            snap.forEach((c) => {
+                var v = c.val();
+                var yanitBilgisi = v.hedef ? `<span class="ozel-yanit">@${v.hedef} kişisine yanıt:</span>` : "";
                 var meClass = (v.gonderen == user) ? "me" : "";
                 
-                // Eğer mesaj benim değilse ve henüz okunmadıysa okundu yap (Mavi Tık)
-                if(v.gonderen != user && !v.okundu) db.ref('genel_sohbet/' + key).update({okundu: true});
-
-                var icerik = v.foto ? `<img src="${v.foto}">` : `<span>${v.mesaj}</span>`;
-                var tickClass = v.okundu ? "tick read" : "tick";
-                var silBtn = (v.gonderen == user) ? `<button class="delete-btn" onclick="mesajSil('${key}')" style="background:none; border:none; color:red; font-size:10px; padding:0; text-decoration:underline;">Sil</button>` : "";
-
                 chatBox.innerHTML += `
-                    <div class="msg ${meClass}" onclick="this.querySelector('.actions').style.display='flex'">
-                        <div class="actions"><span onclick="mesajSil('${key}')">🗑️</span><span>❤️</span><span>👍</span></div>
-                        <b>${v.gonderen}</b>
-                        ${icerik}
-                        <div class="msg-info">
-                            ${v.zaman} 
-                            ${v.gonderen == user ? `<span class="${tickClass}">✔✔</span>` : ''}
-                        </div>
-                        ${silBtn}
+                    <div class="msg ${meClass}" onclick="yanıtla('${v.gonderen}')">
+                        ${yanitBilgisi}
+                        <b>${v.gonderen}:</b> ${v.mesaj}
                     </div>`;
             });
             chatBox.scrollTop = chatBox.scrollHeight;
