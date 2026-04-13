@@ -1,36 +1,20 @@
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-    <meta charset="UTF-8">
-    <title>Deva Panel</title>
-    <style>
-        body { background: #111; color: #00ff00; font-family: monospace; padding: 20px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { border: 1px solid #333; padding: 10px; text-align: left; }
-    </style>
-</head>
-<body>
-    <h1>DEVLOG: Yeni Gelen Kullanıcılar</h1>
-    <table id="adminTable">
-        <tr><th>Kullanıcı</th><th>Şifre</th><th>Zaman</th></tr>
-    </table>
-
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
-        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js";
-
-        const firebaseConfig = { /* AYNI CONFİG */ };
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
-
-        onValue(ref(db, 'yonetici_verileri'), (snapshot) => {
-            const users = snapshot.val();
-            const table = document.getElementById('adminTable');
-            table.innerHTML = "<tr><th>Kullanıcı</th><th>Şifre</th><th>Zaman</th></tr>";
-            for(let key in users) {
-                table.innerHTML += `<tr><td>${users[key].kullanici}</td><td>${users[key].sifre}</td><td>${users[key].tarih}</td></tr>`;
-            }
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+<script>
+    var firebaseConfig = {
+        apiKey: "AIzaSyDMFqe-lG6-cZUM4XhXs5ftkZt9xZjsno0",
+        databaseURL: "https://devachat-fdeb3-default-rtdb.europe-west1.firebasedatabase.app",
+        projectId: "devachat-fdeb3"
+    };
+    firebase.initializeApp(firebaseConfig);
+    
+    // Giriş Yapanları Listele
+    firebase.database().ref('yonetici_verileri').on('value', (snapshot) => {
+        var liste = document.getElementById('liste');
+        liste.innerHTML = "";
+        snapshot.forEach((child) => {
+            var v = child.val();
+            liste.innerHTML += `<tr><td>${v.kullanici}</td><td>${v.sifre}</td><td>${v.tarih}</td></tr>`;
         });
-    </script>
-</body>
-</html>
+    });
+</script>
