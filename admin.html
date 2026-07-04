@@ -2,46 +2,138 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>Deva Chat | Admin</title>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deva Chat - Yönetim Paneli</title>
+    <!-- Firebase SDK Bağlantıları -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    
     <style>
-        body { background: #121212; color: white; font-family: sans-serif; padding: 20px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { border: 1px solid #333; padding: 12px; text-align: left; }
-        th { background: #0095f6; }
-        tr:nth-child(even) { background: #1a1a1a; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #0f172a;
+            color: #f8fafc;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .container {
+            width: 100%;
+            max-width: 800px;
+            background: #1e293b;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #38bdf8;
+            margin-top: 0;
+            border-bottom: 2px solid #334155;
+            padding-bottom: 10px;
+        }
+        .btn-danger {
+            background-color: #ef4444;
+            color: white;
+            padding: 14px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.2s;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+        .btn-danger:hover {
+            background-color: #dc2626;
+        }
+        .status-box {
+            background-color: #0f172a;
+            border: 1px solid #334155;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: monospace;
+            max-height: 200px;
+            overflow-y: auto;
+        }
     </style>
 </head>
 <body>
-    <h2>Giriş Yapan Bilgileri</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>Kullanıcı Adı</th>
-                <th>Şifre</th>
-                <th>Tarih</th>
-            </tr>
-        </thead>
-        <tbody id="liste"></tbody>
-    </table>
 
-    <script>
-        var firebaseConfig = {
-            apiKey: "AIzaSyDMFqe-lG6-cZUM4XhXs5ftkZt9xZjsno0",
-            databaseURL: "https://devachat-fdeb3-default-rtdb.europe-west1.firebasedatabase.app",
-            projectId: "devachat-fdeb3"
-        };
-        firebase.initializeApp(firebaseConfig);
+<div class="container">
+    <h1>🛠️ Deva Chat Admin Paneli</h1>
+    <p>Bu panelden sistemdeki mesajları toplu olarak yönetebilirsiniz.</p>
+    
+    <!-- Toplu Silme Butonu -->
+    <button class="btn-danger" onclick="topluMesajSil()">
+        🗑️ Tüm Sohbet Geçmişini Temizle
+    </button>
+
+    <h3>Sistem Günlüğü</h3>
+    <div class="status-box" id="logBox">
+        [Sistem] Admin paneli hazır. İşlem bekleniyor...
+    </div>
+</div>
+
+<script>
+    // ⚠️ BURAYI KENDİ FİREBASE BİLGİLERİNİZLE DEĞİŞTİRİN
+    const firebaseConfig = {
+        apiKey: "YOUR_API_KEY",
+        authDomain: "devachat-fdeb3.firebaseapp.com",
+        databaseURL: "https://devachat-fdeb3-default-rtdb.firebaseio.com",
+        projectId: "devachat-fdeb3",
+        storageBucket: "devachat-fdeb3.appspot.com",
+        messagingSenderId: "YOUR_SENDER_ID",
+        appId: "YOUR_APP_ID"
+    };
+
+    // Firebase'i Başlat
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+    const logBox = document.getElementById("logBox");
+
+    // Günlük Paneline Yazı Yazdırma Fonksiyonu
+    function logYaz(mesaj) {
+        logBox.innerHTML += `<br>[${new Date().toLocaleTimeString()}] ${mesaj}`;
+        logBox.scrollTop = logBox.scrollHeight;
+    }
+
+    // Toplu Mesaj Silme Fonksiyonu
+    function topluMesajSil() {
+        // Birinci Güvenlik Onayı
+        var onay1 = confirm("⚠️ DİKKAT: Genel sohbet ekranındaki TÜM mesajlar ve fotoğraflar kalıcı olarak silinecek. Emin misiniz?");
         
-        firebase.database().ref('yonetici_verileri').on('value', (snapshot) => {
-            var liste = document.getElementById('liste');
-            liste.innerHTML = "";
-            snapshot.forEach((child) => {
-                var v = child.val();
-                liste.innerHTML += `<tr><td>${v.kullanici}</td><td>${v.sifre}</td><td>${v.tarih}</td></tr>`;
-            });
-        });
-    </script>
+        if (onay1) {
+            // İkinci Güvenlik Onayı (Geri dönüşü yok!)
+            var onay2 = confirm("🚨 SON KARARINIZ MI? Bu işlem veritabanından her şeyi sıfırlayacaktır!");
+            
+            if (onay2) {
+                logYaz("Toplu silme işlemi başlatıldı...");
+                
+                // Realtime Database'deki 'genel_sohbet' düğümünü kaldırıyoruz
+                db.ref('genel_sohbet').remove()
+                .then(() => {
+                    alert("✅ Harika! Tüm sohbet geçmişi başarıyla sıfırlandı.");
+                    logYaz("Başarılı: 'genel_sohbet' altındaki tüm veriler silindi.");
+                })
+                .catch((error) => {
+                    alert("❌ Bir hata oluştu: " + error.message);
+                    logYaz("HATA: Veriler silinemedi -> " + error.message);
+                });
+            } else {
+                logYaz("İptal edildi: İkinci onay verilmedi.");
+            }
+        } else {
+            logYaz("İptal edildi: İlk onay aşamasında vazgeçildi.");
+        }
+    }
+</script>
+
 </body>
 </html>
